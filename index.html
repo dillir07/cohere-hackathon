@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/391827d54c.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono">
+    <style>
+        :root {
+            --primary: #b9010e;
+            --secondary: #dc0000;
+            --primary_white: #f1f0f2;
+            --secondary_white: #e3e1e5;
+        }
+
+        .bg {
+            background-color: var(--primary);
+            color: var(--primary_white);
+        }
+
+        body,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'JetBrains Mono', sans-serif;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            max-height: 460px;
+            width: auto;
+            height: auto;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;
+            /* Mozilla, since 1999 */
+            white-space: -pre-wrap;
+            /* Opera 4-6 */
+            white-space: -o-pre-wrap;
+            /* Opera 7 */
+            word-wrap: break-word;
+            /* Internet Explorer 5.5+ */
+            max-width: 100%;
+        }
+
+        .lds-ellipsis {
+            display: inline;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .lds-ellipsis div {
+            position: absolute;
+            top: 5px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+
+        .lds-ellipsis div:nth-child(1) {
+            left: 8px;
+            animation: lds-ellipsis1 0.6s infinite;
+        }
+
+        .lds-ellipsis div:nth-child(2) {
+            left: 8px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
+
+        .lds-ellipsis div:nth-child(3) {
+            left: 32px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
+
+        .lds-ellipsis div:nth-child(4) {
+            left: 56px;
+            animation: lds-ellipsis3 0.6s infinite;
+        }
+
+        @keyframes lds-ellipsis1 {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes lds-ellipsis3 {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        @keyframes lds-ellipsis2 {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(24px, 0);
+            }
+        }
+    </style>
+</head>
+
+<body style="background-color: #b9010d16;">
+    <header class="w3-container bg">
+        <h1><span style="font-weight: bold;">AI</span> - Marketing Companion</h1>
+    </header>
+    <section class="w3-container w3-cell-row">
+        <div class="w3-cell">
+            <input type="text" name="product" id="product" class="w3-input w3-cell w3-border w3-border-red"
+                placeholder="Ex: Apple Vision Pro">
+        </div>
+        <div class="w3-cell w3-padding">
+            <select name="platform" id="platform" class="w3-select  w3-cell w3-border w3-border-red">
+                <option value="linkedin">&nbsp LinkedIn</option>
+                <option value="twitter">&nbsp Twitter</option>
+                <option value="yammer">&nbsp Yammer</option>
+            </select>
+        </div>
+        <div class="w3-cell">
+            <input type="button" value="Create Post" class="w3-btn bg" id="btn-create-post">
+            <div class="lds-ellipsis w3-hide" id="loading-bar">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </section>
+    <main id="main-content" class="w3-row-padding">
+    </main>
+    <script>
+        $(document).ready(function () {
+
+            function getRandomImageFromArray(arr) {
+                const images = Array.from(arr).filter(item => String(item).endsWith(".jpg") || String(item).endsWith(".jpeg"))
+                const randomIndex = Math.floor(Math.random() * images.length);
+                return images[randomIndex];
+            }
+
+            $("#btn-create-post").click(function () {
+                let product = $("#product").val()
+                let platform = $("#platform").val()
+                $("#loading-bar").removeClass("w3-hide")
+                $.ajax({
+                    method: "POST",
+                    url: "/create_post",
+                    contentType: "application/json",
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        "product": product,
+                        "platform": platform
+                    }),
+                }).then(function (response) {
+                    console.log(response);
+                    const hashtagsHTML = []
+                    Array.from(response.hashtags).forEach(hashtag => {
+                        hashtagsHTML.push(`<span>${hashtag}</span>`)
+                    })
+                    $("#main-content").append(`
+                    <section class="w3-third">
+                        <div class="w3-card w3-round">
+                            <div class="w3-display-container">
+                                <img src="${getRandomImageFromArray(response.images)}" alt="">
+                                <header class="w3-container w3-display-topmiddle" style="background-color: var(--primary);color: var(--primary_white);width: 100%;">
+                                    <h2>${response.title}</h2>
+                                </header>
+                                <footer class="w3-container w3-display-bottommiddle" style="background-color: var(--primary);color: var(--primary_white);width: 100%;">
+                                    <h2><a href="${response.link}">${response.title}</a></h2>
+                                </footer>
+                            </div>
+                            <pre class="w3-container w3-white" style="margin-top: 0px;margin-bottom: 0px;padding-top:15px;padding-bottom:0px;max-height:400px;overflow:scroll;">${response.text}</pre>
+                            <pre>${hashtagsHTML.join("&nbsp;")}</pre>
+                        </div>
+                    </section>`)
+                    $("#loading-bar").addClass("w3-hide")
+                }).fail(function (error) {
+                    console.error(error);
+                    $("#loading-bar").addClass("w3-hide")
+                })
+            })
+        })
+    </script>
+</body>
+
+</html>
